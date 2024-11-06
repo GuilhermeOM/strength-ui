@@ -13,13 +13,7 @@ import { Button } from '@/components/ui/button'
 const signInSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
-  remember: z.custom<CheckedState>().transform((data) => {
-    if (!data || data === 'indeterminate') {
-      return false
-    }
-
-    return data
-  }),
+  remember: z.custom<CheckedState>().transform((data) => (!data || data === 'indeterminate' ? false : data)),
 })
 
 type SignInSchema = z.infer<typeof signInSchema>
@@ -28,7 +22,7 @@ export default function SignIn() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     control,
   } = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
@@ -65,7 +59,7 @@ export default function SignIn() {
         <FormCheckbox name="remember" control={control} label="Remember me" defaultValue={true} />
       </div>
       <div className="flex flex-col gap-4">
-        <Button className="w-full" type="submit">
+        <Button className="w-full" type="submit" disabled={isSubmitting}>
           Sign in
         </Button>
         <Link to="/auth/sign-up" className="text-sm hover:underline">
