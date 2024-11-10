@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import userRegisterRequest from '@/api/user-register'
+import userRegisterRequest from '@/api/user/user-register'
 import FormInput from '@/components/form/form-input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'

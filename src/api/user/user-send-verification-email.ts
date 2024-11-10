@@ -1,6 +1,6 @@
-import { api, errorHandler, successHandler } from '@/lib/axios'
+import { api, failureResponseHandler } from '@/lib/axios'
 
-import { DefaultResponse } from './types/response-type'
+import { DefaultResponse } from '../response-type'
 
 interface UserSendVerificationEmailRequestParams {
   email: string
@@ -13,6 +13,6 @@ export default async function userSendVerificationEmailRequest({
     .post<string>('/user/send-verification-email', {
       email,
     })
-    .then(successHandler)
-    .catch(errorHandler)
+    .then((response) => ({ isSuccess: true, result: response.data }))
+    .catch(failureResponseHandler)
 }

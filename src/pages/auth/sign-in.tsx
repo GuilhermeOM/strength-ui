@@ -1,11 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckedState } from '@radix-ui/react-checkbox'
+import Cookies from 'js-cookie'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import userLoginRequest from '@/api/user-login'
+import { RESPONSE_CODES } from '@/api/response-code'
+import { FailureResponse } from '@/api/response-type'
+import userLoginRequest from '@/api/user/user-login'
+import userSendVerificationEmailRequest from '@/api/user/user-send-verification-email'
 import FormCheckbox from '@/components/form/form-checkbox'
 import FormInput from '@/components/form/form-input'
 import { Button } from '@/components/ui/button'
@@ -28,12 +32,42 @@ export default function SignIn() {
     resolver: zodResolver(signInSchema),
   })
 
+  const navigate = useNavigate()
+
   async function submit(formValues: SignInSchema) {
     const { email, password } = formValues
 
-    const login = await userLoginRequest({ email, password })
+    const signin = await userLoginRequest({ email, password })
 
-    login.isSuccess ? toast.success(login.result?.token) : toast.error(login.failure?.errors[0].description)
+    signin.isSuccess ? handleSigninSuccess(signin.result?.token) : handleSigninFailure(email, signin.failure!)
+  }
+
+  function handleSigninSuccess(token: string | undefined) {
+    if (!token) return
+
+    Cookies.set('token', token, { expires: 7, secure: true })
+    navigate('/')
+  }
+
+  function handleSigninFailure(email: string, failure: FailureResponse) {
+    if (failure.errors.length === 0) return
+
+    const error = failure.errors[0]
+
+    const requestVerificationAction = {
+      label: 'request verification',
+      onClick: () => requestVerificationEmail(email),
+    }
+
+    error.code === RESPONSE_CODES.USER_NOT_VERIFIED
+      ? toast.error(error.description, { action: requestVerificationAction })
+      : toast.error(error.description)
+  }
+
+  async function requestVerificationEmail(email: string) {
+    const response = await userSendVerificationEmailRequest({ email })
+
+    response.isSuccess ? toast.success(response.result) : toast.error('error sending the verification')
   }
 
   return (

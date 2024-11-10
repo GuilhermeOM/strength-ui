@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import userSendVerificationEmailRequest from '@/api/user-send-verification-email'
+import userSendVerificationEmailRequest from '@/api/user/user-send-verification-email'
 
 export default function Verification() {
   const [searchParams] = useSearchParams()
@@ -10,7 +10,7 @@ export default function Verification() {
     const email = searchParams.get('email') ?? ''
     const response = await userSendVerificationEmailRequest({ email })
 
-    response.isSuccess ? toast.success(response.result) : toast.error('error sending the verification')
+    response.isSuccess ? toast.success(response.result) : toast.error('Error sending the verification')
   }
 
   return (
